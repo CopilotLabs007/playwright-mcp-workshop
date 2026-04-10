@@ -44,7 +44,35 @@ This enables two modes of operation:
 | Playwright | Installed through this repo's dependencies |
 | Running app | Must be reachable at the configured base URL |
 
-Install the browser once if needed:
+### Install Node.js via nvm
+
+Download and install nvm:
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+```
+
+Load nvm into the current shell (in lieu of restarting the terminal):
+
+```bash
+\. "$HOME/.nvm/nvm.sh"
+```
+
+Download and install Node.js:
+
+```bash
+nvm install 24
+```
+
+Verify the installation:
+
+```bash
+node -v   # Should print v24.14.1
+npm -v    # Should print 11.11.0
+npx -v    # Should print 11.11.0
+```
+
+### Install Chromium for Playwright
 
 ```bash
 npx playwright install chromium
