@@ -52,11 +52,11 @@ npx playwright install chromium
 
 ---
 
-## 5. Install And Configure Playwright MCP
+## 4. Installation
 
-### Option A: Microsoft package
+### Option A — Microsoft Playwright MCP (Recommended)
 
-Recommended package:
+The official Microsoft Playwright MCP package is `@playwright/mcp`.
 
 ```bash
 npm install -g @playwright/mcp
@@ -68,11 +68,19 @@ Verify installation:
 npx @playwright/mcp --version
 ```
 
-### Option B: Workspace-driven execution
+### Option B — Community Playwright MCP Server
 
-This repo already uses `npx @playwright/mcp@latest` inside `.vscode/mcp.json`, so a global install is optional if the workspace config is used directly.
+If using the `playwright-mcp` community package:
 
-### Verify VS Code picks it up
+```bash
+npm install -g playwright-mcp
+```
+
+---
+
+## 5. Configuration - Verify VS Code picks it up
+
+### Option A: Global MCP Server Configuration (Recommended)
 
 1. Open Copilot Chat.
 2. Type `@playwright`.
@@ -80,55 +88,60 @@ This repo already uses `npx @playwright/mcp@latest` inside `.vscode/mcp.json`, s
 4. Confirm the Playwright browser tools are listed.
 
 ![alt text](/GuidedLab/images/check-tools.png)
+
 If not visible, reload the VS Code window and check for errors in the output panel.
 ![alt text](/GuidedLab/images/Reload-Window.png)
 
 ---
-## 5. Repository Settings Used In This Workshop
+
+### Option B: Workspace-driven execution
+
+Add the configuration `npx @playwright/mcp@latest` inside `.vscode/mcp.json`, if you want to use the local workspace config instead of global configuration.
+
+### Step 1: Open MCP configuration
+
+Open VS Code Settings → search for `MCP` → open `mcp.json`
+(or create `.vscode/mcp.json` in the workspace root).
 
 ![alt text](/GuidedLab/images/vscode-mcp-json.png)
-### MCP config
 
-The current MCP environment variable in `.vscode/mcp.json` is:
+### Step 2: Add the server entry
+
+#### Using `@playwright/mcp` (Microsoft package)
 
 ```json
 {
-  "servers": {
-    "microsoft/playwright-mcp": {
-      "type": "stdio",
+  "mcpServers": {
+    "playwright": {
       "command": "npx",
-      "args": [
-        "@playwright/mcp@latest"
-      ],
+      "args": ["@playwright/mcp", "--browser", "chromium"],
       "env": {
         "PLAYWRIGHT_BASE_URL": "http://localhost:3000"
       }
     }
-  },
-  "inputs": []
+  }
 }
 ```
 
-This repo is already set up to use the local Express app at:
+#### Using `playwright-mcp` (community package)
 
-```text
-http://localhost:3000
-```
-
-### Playwright config
-
-The current base URL in `playwright.config.ts` is:
-
-```ts
-use: {
-  baseURL: 'http://localhost:3000',
-  trace: 'on-first-retry'
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["playwright-mcp"],
+      "env": {
+        "BASE_URL": "http://localhost:3000"
+      }
+    }
+  }
 }
 ```
 
-If the app host or port changes, update both places.
+---
 
-## 6. Available Tool Names
+## 6. Check Available Tool Names
 
 When the MCP server is active, these are the browser tools expected in this workshop.
 
@@ -166,7 +179,7 @@ When the MCP server is active, these are the browser tools expected in this work
 
 ---
 
-## 7. Selector Convention For This App
+## 7. Selector Convention For This App [Optional]
 
 Use existing `data-testid` values when possible. Do not use CSS classes or positional selectors for workshop demos.
 
@@ -247,6 +260,19 @@ open http://localhost:3000/playground
 open http://localhost:3000/quiz
 ```
 
+### Playwright config (optional)  
+
+The current base URL in `playwright.config.ts` is:
+
+```ts
+use: {
+  baseURL: 'http://localhost:3000',
+  trace: 'on-first-retry'
+}
+```
+
+If the app host or port changes, update both places.
+
 ---
 
 ## 9. Workshop Flow At A Glance
@@ -254,18 +280,8 @@ open http://localhost:3000/quiz
 Use this order for a smooth hands-on session:
 
 1. Confirm the app is running and MCP tools are available.
-2. Run two smoke prompts to validate navigation.
-3. Try click and modal workflows.
-4. Try form fill and note entry.
-5. Try selection and dynamic content.
-6. Try hover and resize.
-7. Try file upload and note removal.
-8. Try drag and drop.
-9. Try screenshot and accessibility snapshot.
-10. Try browser history.
-11. Finish with the quiz flow.
-
-This progression builds confidence before moving into richer interactions.
+2. Run the Quick Readiness Check prompts to validate the setup.
+3. Work through the Guided Hands-On Exercises in order, or jump to any stage of interest.
 
 ---
 
@@ -309,11 +325,6 @@ Prompt:
 Open /playground and tell me which major interactive sections are visible.
 ```
 
-Primary tools exercised:
-
-- `browser_navigate`
-- `browser_snapshot`
-
 Expected result:
 
 - The page opens successfully.
@@ -327,11 +338,6 @@ Prompt:
 Open /quiz and tell me whether the intro screen and Start Quiz button are visible.
 ```
 
-Primary tools exercised:
-
-- `browser_navigate`
-- `browser_snapshot`
-
 ### Stage B: Click And Modal Flows
 
 #### 3. Open and close the learning reminder modal
@@ -342,11 +348,6 @@ Prompt:
 Open /playground, click "Open Learning Reminder", verify the modal is visible, then click "Close" and verify the modal closes.
 ```
 
-Primary tools exercised:
-
-- `browser_click`
-- `browser_snapshot`
-
 #### 4. Accept the modal with the main action button
 
 Prompt:
@@ -355,11 +356,6 @@ Prompt:
 Open /playground, click "Open Learning Reminder", verify the modal is visible, then click "I am ready" and verify the modal closes.
 ```
 
-Primary tools exercised:
-
-- `browser_click`
-- `browser_snapshot`
-
 #### 5. Close the modal with the keyboard
 
 Prompt:
@@ -367,12 +363,6 @@ Prompt:
 ```text
 Open /playground, click "Open Learning Reminder", verify the dialog appears, then press Escape and verify the dialog closes.
 ```
-
-Primary tools exercised:
-
-- `browser_click`
-- `browser_press_key`
-- `browser_snapshot`
 
 ### Stage C: Form Filling And Typing
 
@@ -399,12 +389,6 @@ Story mode: checked
 Then set the energy level to 8, click Save Profile, and summarize the saved result.
 ```
 
-Primary tools exercised:
-
-- `browser_fill_form`
-- `browser_click`
-- `browser_snapshot`
-
 #### 7. Type into the notes board manually
 
 Prompt:
@@ -413,12 +397,6 @@ Prompt:
 Open /playground, switch to the Notes Board tab, type "Practice colors" into the note input, click Add Note, and confirm the note appears.
 ```
 
-Primary tools exercised:
-
-- `browser_click`
-- `browser_type`
-- `browser_snapshot`
-
 #### 8. Verify form validation behavior
 
 Prompt:
@@ -426,11 +404,6 @@ Prompt:
 ```text
 Open /playground, click Save Profile without entering any values, and tell me what validation or error message appears.
 ```
-
-Primary tools exercised:
-
-- `browser_click`
-- `browser_snapshot`
 
 ### Stage D: Dropdowns And Selection
 
@@ -442,12 +415,6 @@ Prompt:
 Open /playground, in Fact Finder select Animals, click Load Fact, and tell me the fact text that appears.
 ```
 
-Primary tools exercised:
-
-- `browser_select_option`
-- `browser_click`
-- `browser_snapshot`
-
 #### 10. Change topics and verify the state resets
 
 Prompt:
@@ -455,12 +422,6 @@ Prompt:
 ```text
 Open /playground, load a fact for Animals, then change the topic to Quiz and confirm the fact area resets before loading the next fact.
 ```
-
-Primary tools exercised:
-
-- `browser_select_option`
-- `browser_click`
-- `browser_snapshot`
 
 ### Stage E: Hover And Resize
 
@@ -472,11 +433,6 @@ Prompt:
 Open /playground, hover over the Quiz link in the top navigation, then hover over the Open Learning Reminder button, and describe any visible state changes.
 ```
 
-Primary tools exercised:
-
-- `browser_hover`
-- `browser_snapshot`
-
 #### 12. Resize for mobile layout
 
 Prompt:
@@ -484,11 +440,6 @@ Prompt:
 ```text
 Open /playground, resize the browser to a mobile viewport around 390 by 844, and tell me whether the layout stacks into a single column cleanly.
 ```
-
-Primary tools exercised:
-
-- `browser_resize`
-- `browser_snapshot`
 
 ### Stage F: File Upload And Notes
 
@@ -500,12 +451,6 @@ Prompt:
 Open /playground, switch to the Upload Corner tab, upload a small text file, and confirm the uploaded filename appears in the list.
 ```
 
-Primary tools exercised:
-
-- `browser_click`
-- `browser_file_upload`
-- `browser_snapshot`
-
 #### 14. Add and remove a note
 
 Prompt:
@@ -513,12 +458,6 @@ Prompt:
 ```text
 Open /playground, go to Notes Board, add a note that says "Practice shapes", then remove it and confirm it disappears.
 ```
-
-Primary tools exercised:
-
-- `browser_type`
-- `browser_click`
-- `browser_snapshot`
 
 ### Stage G: Drag And Drop
 
@@ -529,11 +468,6 @@ Prompt:
 ```text
 Open /playground and complete the animal habitat drag-and-drop activity, then tell me the match status text.
 ```
-
-Primary tools exercised:
-
-- `browser_drag`
-- `browser_snapshot`
 
 Expected result:
 
@@ -550,12 +484,6 @@ Prompt:
 Open /playground, complete the habitat matches, click Reset Match Game, and verify the status returns to 0 of 3 matches complete.
 ```
 
-Primary tools exercised:
-
-- `browser_drag`
-- `browser_click`
-- `browser_snapshot`
-
 ### Stage H: Screenshots And Snapshots
 
 #### 17. Capture a full-page screenshot
@@ -566,10 +494,6 @@ Prompt:
 Open /playground and take a screenshot of the current page so I can review the layout.
 ```
 
-Primary tools exercised:
-
-- `browser_take_screenshot`
-
 #### 18. Capture a structured accessibility snapshot
 
 Prompt:
@@ -577,10 +501,6 @@ Prompt:
 ```text
 Open /playground and give me an accessibility-style page snapshot so I can inspect the interactive elements and their roles.
 ```
-
-Primary tools exercised:
-
-- `browser_snapshot`
 
 ### Stage I: Navigation History
 
@@ -592,12 +512,6 @@ Prompt:
 Open /playground, then navigate to /quiz, then go back in browser history and confirm you returned to /playground.
 ```
 
-Primary tools exercised:
-
-- `browser_navigate`
-- `browser_navigate_back`
-- `browser_snapshot`
-
 ### Stage J: Quiz Use Case
 
 #### 20. Start the quiz and verify disabled next state
@@ -608,57 +522,9 @@ Prompt:
 Open /quiz, click Start Quiz, and confirm that the Next button is disabled until an answer is selected.
 ```
 
-Primary tools exercised:
-
-- `browser_click`
-- `browser_snapshot`
-
 ---
 
-## 12. Suggested Live Demo Sequence
-
-If you want one compact end-to-end instructor demo, use this order:
-
-1. Open `/playground`.
-2. Open and close the learning reminder modal.
-3. Fill the learner profile and save it.
-4. Switch to Upload Corner and upload a file.
-5. Switch to Notes Board and add a note.
-6. Load a fact for Animals.
-7. Complete the habitat drag-and-drop game.
-8. Resize to mobile and take a screenshot.
-9. Open `/quiz` and verify the quiz can start.
-
-This path covers navigation, clicking, typing, form fill, upload, selection, drag and drop, screenshots, and route changes in one realistic walkthrough.
-
----
-
-## 13. Running The Playwright Test Suite
-
-Use the terminal for the authoritative automated test run.
-
-```bash
-npm test
-```
-
-Repo-specific useful commands:
-
-```bash
-npm run test:playground
-npm run test:quiz
-npm run test:headed
-npx playwright test --reporter=list
-```
-
-The current `playwright.config.ts` uses:
-
-- `testDir: './tests'`
-- `baseURL: 'http://localhost:3000'`
-- `trace: 'on-first-retry'`
-
----
-
-## 14. Troubleshooting
+## 12. Troubleshooting
 
 ### MCP server does not appear in Copilot
 
@@ -680,20 +546,11 @@ The current `playwright.config.ts` uses:
 - Use `browser_snapshot` first if the UI state may have changed.
 - Use `browser_take_screenshot` if you need a quick visual check.
 
-### MCP session works but CLI tests fail
-
-- MCP validation and CLI test execution are related but not identical.
-- Run `npm run test:headed` to inspect behavior visually.
-- Run `npx playwright test --reporter=list` for detailed CLI feedback.
-
 ---
 
-## 15. References
+## 13. References
 
 - [Playwright documentation](https://playwright.dev)
 - [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp)
 - [VS Code MCP configuration](https://code.visualstudio.com/docs/copilot/mcp)
-- `playwright.config.ts`
-- `.vscode/mcp.json`
-- `tests/playground.spec.ts`
-- `tests/quiz.spec.ts`
+
