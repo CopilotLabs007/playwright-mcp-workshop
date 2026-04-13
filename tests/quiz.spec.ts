@@ -76,3 +76,65 @@ test('allows restarting the quiz after results', async ({ page }) => {
   await expect(page.getByTestId('quiz-intro')).toBeVisible();
   await expect(page.getByTestId('quiz-results')).toBeHidden();
 });
+
+test('previous button is disabled on the first question', async ({ page }) => {
+  await page.getByTestId('start-quiz').click();
+
+  await expect(page.getByTestId('previous-question')).toBeDisabled();
+});
+
+test('last question shows Show Results on the next button', async ({ page }) => {
+  await page.getByTestId('start-quiz').click();
+
+  await page.getByRole('radio', { name: 'Ball' }).check();
+  await page.getByTestId('next-question').click();
+  await page.getByRole('radio', { name: '8' }).check();
+  await page.getByTestId('next-question').click();
+  await page.getByRole('radio', { name: 'Orange' }).check();
+  await page.getByTestId('next-question').click();
+  await page.getByRole('radio', { name: 'Triangle' }).check();
+  await page.getByTestId('next-question').click();
+
+  await expect(page.getByTestId('quiz-progress-text')).toHaveText('Question 5 of 5');
+  await expect(page.getByTestId('next-question')).toHaveText('Show Results');
+});
+
+test('score of exactly 4 out of 5 shows the excellent work message', async ({ page }) => {
+  await page.getByTestId('start-quiz').click();
+
+  await page.getByRole('radio', { name: 'Ball' }).check();
+  await page.getByTestId('next-question').click();
+  await page.getByRole('radio', { name: '8' }).check();
+  await page.getByTestId('next-question').click();
+  await page.getByRole('radio', { name: 'Orange' }).check();
+  await page.getByTestId('next-question').click();
+  await page.getByRole('radio', { name: 'Triangle' }).check();
+  await page.getByTestId('next-question').click();
+  await page.getByRole('radio', { name: 'Duck' }).check();
+  await page.getByTestId('next-question').click();
+
+  await expect(page.getByTestId('quiz-score')).toHaveText('You scored 4 out of 5');
+  await expect(page.getByTestId('quiz-message')).toHaveText(
+    'Excellent work! You are ready for more practice.'
+  );
+});
+
+test('review marks correct and wrong answers after submission', async ({ page }) => {
+  await page.getByTestId('start-quiz').click();
+
+  await page.getByRole('radio', { name: 'Ball' }).check();
+  await page.getByTestId('next-question').click();
+  await page.getByRole('radio', { name: '6' }).check();
+  await page.getByTestId('next-question').click();
+  await page.getByRole('radio', { name: 'Orange' }).check();
+  await page.getByTestId('next-question').click();
+  await page.getByRole('radio', { name: 'Triangle' }).check();
+  await page.getByTestId('next-question').click();
+  await page.getByRole('radio', { name: 'Cow' }).check();
+  await page.getByTestId('next-question').click();
+
+  const review = page.getByTestId('quiz-review');
+
+  await expect(review.locator('li.correct-answer').first()).toContainText('Ball');
+  await expect(review.locator('li.wrong-answer').first()).toContainText('Your answer: 6');
+});

@@ -114,3 +114,65 @@ test('matches habitats with drag and drop', async ({ page }) => {
   await playgroundPage.resetMatches();
   await expect(playgroundPage.matchStatus).toHaveText('0 of 3 matches complete.');
 });
+
+test('decrements the counter with the minus button', async ({ page }) => {
+  const playgroundPage = new PlaygroundPage(page);
+
+  await playgroundPage.incrementCounter(3);
+  await expect(playgroundPage.counterValue).toHaveText('3');
+
+  await page.getByTestId('counter-decrease').click();
+  await expect(playgroundPage.counterValue).toHaveText('2');
+});
+
+test('clears the profile form with the clear button', async ({ page }) => {
+  const playgroundPage = new PlaygroundPage(page);
+
+  await playgroundPage.saveProfile({
+    learnerName: 'Alex',
+    learnerAge: '8-9',
+    favoriteLesson: 'lesson-alphabet'
+  });
+
+  await expect(playgroundPage.profileResult).toBeVisible();
+
+  await page.getByTestId('profile-clear').click();
+
+  await expect(playgroundPage.profileResult).toBeHidden();
+  await expect(playgroundPage.learnerName).toHaveValue('');
+});
+
+test('closes the modal with the Escape key', async ({ page }) => {
+  const playgroundPage = new PlaygroundPage(page);
+
+  await playgroundPage.openModal();
+  await page.keyboard.press('Escape');
+  await expect(playgroundPage.reminderModal).toBeHidden();
+});
+
+test('story tab panel is visible by default', async ({ page }) => {
+  await expect(page.getByTestId('panel-story')).toBeVisible();
+  await expect(page.getByTestId('panel-upload')).toBeHidden();
+  await expect(page.getByTestId('panel-notes')).toBeHidden();
+});
+
+test('uploads multiple files and lists them all', async ({ page }) => {
+  const playgroundPage = new PlaygroundPage(page);
+
+  await playgroundPage.openUploadTab();
+  await playgroundPage.fileUpload.setInputFiles([
+    {
+      name: 'notes-a.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.from('file a', 'utf-8')
+    },
+    {
+      name: 'notes-b.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.from('file b', 'utf-8')
+    }
+  ]);
+
+  await expect(playgroundPage.uploadList).toContainText('notes-a.txt');
+  await expect(playgroundPage.uploadList).toContainText('notes-b.txt');
+});
